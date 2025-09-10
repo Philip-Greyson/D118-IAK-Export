@@ -106,27 +106,31 @@ if __name__ == '__main__':
 
 
         # # Create and send the email
-        mime_message = EmailMessage() # create a email message object
-        # # headers
-        mime_message['To'] = EMAIL_TARGET # the email address it is sent to
-        mime_message['Subject'] = 'Ident-A-Kid User List For ' + datetime.now().strftime('%Y-%m-%d') # subject line of the email, change to your liking
-        # mime_message.set_content(f"Warning, there were {errorCount} errors in recent scripts: \n{errorString}") # the body of the email, aka the text
+        try:
+            mime_message = EmailMessage() # create a email message object
+            # # headers
+            mime_message['To'] = EMAIL_TARGET # the email address it is sent to
+            mime_message['Subject'] = 'Ident-A-Kid User List For ' + datetime.now().strftime('%Y-%m-%d') # subject line of the email, change to your liking
+            mime_message.set_content("Here is the file containing staff and substitutes for easy import into Ident-A-Kid.") # the body of the email, aka the text
 
-        # # attachment
-        attachment_filename = OUTPUT_FILE_NAME # tell the email what file we are attaching
-        # # guessing the MIME type
-        type_subtype, _ = mimetypes.guess_type(attachment_filename)
-        maintype, subtype = type_subtype.split('/')
+            # # attachment
+            attachment_filename = OUTPUT_FILE_NAME # tell the email what file we are attaching
+            # # guessing the MIME type
+            type_subtype, _ = mimetypes.guess_type(attachment_filename)
+            maintype, subtype = type_subtype.split('/')
 
-        with open(attachment_filename, 'rb') as fp:
-            attachment_data = fp.read() # read the file data in and store it in the attachment_data
-        mime_message.add_attachment(attachment_data, maintype, subtype, filename=OUTPUT_FILE_NAME) # add the attacment data to the message object, give it a filename that was our output name
+            with open(attachment_filename, 'rb') as fp:
+                attachment_data = fp.read() # read the file data in and store it in the attachment_data
+            mime_message.add_attachment(attachment_data, maintype, subtype, filename=OUTPUT_FILE_NAME) # add the attacment data to the message object, give it a filename that was our output name
 
-        # # encoded message
-        encoded_message = base64.urlsafe_b64encode(mime_message.as_bytes()).decode()
-        create_message = {
-            'raw': encoded_message
-        }
-        send_message = (service.users().messages().send(userId="me", body=create_message).execute())
-        print(f'INFO: Email sent, message ID: {send_message["id"]}') # print out resulting message Id
-        print(f'INFO: Email sent, message ID: {send_message["id"]}', file=log)
+            # # encoded message
+            encoded_message = base64.urlsafe_b64encode(mime_message.as_bytes()).decode()
+            create_message = {
+                'raw': encoded_message
+            }
+            send_message = (service.users().messages().send(userId="me", body=create_message).execute())
+            print(f'INFO: Email sent, message ID: {send_message["id"]}') # print out resulting message Id
+            print(f'INFO: Email sent, message ID: {send_message["id"]}', file=log)
+        except Exception as er:
+            print(f'ERROR wile creating or sending email: {er}')
+            print(f'ERROR wile creating or sending email: {er}', file=log)
